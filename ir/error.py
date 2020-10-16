@@ -1,0 +1,2 @@
+class IrError(Exception):
+    pass
