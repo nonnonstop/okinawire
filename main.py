@@ -43,7 +43,8 @@ def main():
     try:
         with ir.IrReceiver(pi, args.r, on_ir_received, args.e), \
                 ir.IrTransmitter(pi, args.t) as ir_transmitter, \
-                sensor.Bme680(pi, args.d) as bme680:
+                sensor.Bme680(pi, args.d) as bme680, \
+                sensor.Lis3dh(pi, args.d) as lis3dh:
             bme680.apply_config(
                 osrs_t=sensor.Bme680.OSRS_1,
                 osrs_h=sensor.Bme680.OSRS_1,
@@ -53,6 +54,7 @@ def main():
                 gas_wait=200,
                 heat_temp=300,
                 amb_temp=25)
+            lis3dh.apply_config(sensor.Lis3dh.DATA_RATE_100HZ, sensor.Lis3dh.POWER_MODE_NORMAL)
             while True:
                 print('> ', end='', flush=True)
                 line = sys.stdin.readline().strip()
@@ -90,6 +92,11 @@ def main():
                         print(f"Humidity: {hum_comp} %")
                         print(f"Pressure: {press_comp} hPa")
                         print(f"Gas resistance: {gas_res} Ohms")
+                        print()
+                        x, y, z = lis3dh.get_data()
+                        print(f"Acceleration X: {x}")
+                        print(f"Acceleration Y: {y}")
+                        print(f"Acceleration Z: {z}")
                     else:
                         print(f'Not supported: {com_arg}')
                         continue
