@@ -32,6 +32,9 @@ def main():
     arg_parser.add_argument(
         '-e', type=float, default=0.5, help='Error rate for receiver')
     args = arg_parser.parse_args()
+    arg_parser.add_argument(
+        '-d', default=11, help='I2C device id')
+    args = arg_parser.parse_args()
 
     # Start PI
     pi = pigpio.pi()
@@ -40,7 +43,7 @@ def main():
     try:
         with ir.IrReceiver(pi, args.r, on_ir_received, args.e), \
                 ir.IrTransmitter(pi, args.t) as ir_transmitter, \
-                sensor.Bme680(pi, 11) as bme680:
+                sensor.Bme680(pi, args.d) as bme680:
             bme680.apply_config(
                 osrs_t=sensor.Bme680.OSRS_1,
                 osrs_h=sensor.Bme680.OSRS_1,
