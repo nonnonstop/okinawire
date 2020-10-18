@@ -6,6 +6,7 @@ import signal
 import sys
 import time
 import ir
+import sensor
 
 
 def signal_handler(signum, frame):
@@ -38,7 +39,17 @@ def main():
         raise RuntimeError('pigpio is unavailable')
     try:
         with ir.IrReceiver(pi, args.r, on_ir_received, args.e), \
-                ir.IrTransmitter(pi, args.t) as ir_transmitter:
+                ir.IrTransmitter(pi, args.t) as ir_transmitter, \
+                sensor.Bme680(pi, 11) as bme680:
+            bme680.apply_config(
+                osrs_t=sensor.Bme680.OSRS_1,
+                osrs_h=sensor.Bme680.OSRS_1,
+                osrs_p=sensor.Bme680.OSRS_1,
+                iir_filter=sensor.Bme680.FILTER_0,
+                nb_conv=sensor.Bme680.NB_CONVS_0,
+                gas_wait=200,
+                heat_temp=300,
+                amb_temp=25)
             while True:
                 print('> ', end='', flush=True)
                 line = sys.stdin.readline().strip()
@@ -50,6 +61,7 @@ def main():
                     print('quit')
                     print('send nec <DATA>')
                     print('send aeha <DATA>')
+                    print('get env')
                     continue
                 elif 'quit'.startswith(com) or 'exit'.startswith(com):
                     return
@@ -68,6 +80,16 @@ def main():
                     generator.generate(com_args)
                     ir_transmitter.transmit(generator)
                     time.sleep(1)
+                elif 'get'.startswith(com):
+                    if com_arg == 'env':
+                        temp_comp, hum_comp, press_comp, gas_res = bme680.get_data()
+                        print(f"Temperature: {temp_comp} C")
+                        print(f"Humidity: {hum_comp} %")
+                        print(f"Pressure: {press_comp} hPa")
+                        print(f"Gas resistance: {gas_res} Ohms")
+                    else:
+                        print(f'Not supported: {com_arg}')
+                        continue
                 else:
                     print('Command not found')
     finally:
