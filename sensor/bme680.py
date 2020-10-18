@@ -152,7 +152,7 @@ class Bme680:
         self._par_g1 = None
         self._par_g2 = None
         self._par_g3 = None
-        self.duration_ns = 1000000
+        self._duration_secs = None
 
     def __enter__(self):
         self.start()
