@@ -44,7 +44,8 @@ def main():
         with ir.IrReceiver(pi, args.r, on_ir_received, args.e), \
                 ir.IrTransmitter(pi, args.t) as ir_transmitter, \
                 sensor.Bme680(pi, args.d) as bme680, \
-                sensor.Lis3dh(pi, args.d) as lis3dh:
+                sensor.Lis3dh(pi, args.d) as lis3dh, \
+                sensor.Adt7410(pi, args.d) as adt7410:
             bme680.apply_config(
                 osrs_t=sensor.Bme680.OSRS_1,
                 osrs_h=sensor.Bme680.OSRS_1,
@@ -87,6 +88,9 @@ def main():
                     time.sleep(1)
                 elif 'get'.startswith(com):
                     if com_arg == 'env':
+                        temp_comp = adt7410.get_data()
+                        print(f"Temperature: {temp_comp} C")
+                        print()
                         temp_comp, hum_comp, press_comp, gas_res = bme680.get_data()
                         print(f"Temperature: {temp_comp} C")
                         print(f"Humidity: {hum_comp} %")
