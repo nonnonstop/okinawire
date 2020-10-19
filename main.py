@@ -17,6 +17,13 @@ def on_ir_received(result):
     print(result)
 
 
+def on_motion_detected(level):
+    if level:
+        print('Motion: ON')
+    else:
+        print('Motion: OFF')
+
+
 def main():
     # Set signal handler
     signal.signal(signal.SIGINT, signal_handler)
@@ -31,9 +38,10 @@ def main():
         '-r', default=26, help='GPIO pin number of receiver')
     arg_parser.add_argument(
         '-e', type=float, default=0.5, help='Error rate for receiver')
-    args = arg_parser.parse_args()
     arg_parser.add_argument(
         '-d', default=11, help='I2C device id')
+    arg_parser.add_argument(
+        '-m', default=27, help='GPIO pin number of motion sensor')
     args = arg_parser.parse_args()
 
     # Start PI
@@ -45,7 +53,8 @@ def main():
                 ir.IrTransmitter(pi, args.t) as ir_transmitter, \
                 sensor.Bme680(pi, args.d) as bme680, \
                 sensor.Lis3dh(pi, args.d) as lis3dh, \
-                sensor.Adt7410(pi, args.d) as adt7410:
+                sensor.Adt7410(pi, args.d) as adt7410, \
+                sensor.Motion(pi, args.m, on_motion_detected, 10):
             bme680.apply_config(
                 osrs_t=sensor.Bme680.OSRS_1,
                 osrs_h=sensor.Bme680.OSRS_1,
